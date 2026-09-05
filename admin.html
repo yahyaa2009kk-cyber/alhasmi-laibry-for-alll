@@ -1,0 +1,87 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>لوحة إدارة مكتبة الهاشمي</title>
+<style>
+:root{--bg:#070707;--card:#101010;--card2:#151515;--line:#302a1a;--gold:#d4aa27;--gold2:#f0d77a;--text:#f7f3e9;--muted:#aaa397;--red:#b63b3b;--green:#4e9b70}
+*{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;background:radial-gradient(circle at top,#17130a 0,#070707 34%);color:var(--text);font-family:Tahoma,Arial,sans-serif}.hidden{display:none!important}.wrap{width:min(1100px,100%);margin:auto;padding:18px 14px 45px}.panel{background:rgba(16,16,16,.96);border:1px solid var(--line);border-radius:22px;box-shadow:0 18px 55px #0009}.login{max-width:480px;margin:7vh auto;padding:26px}.brand{display:flex;align-items:center;gap:12px}.logo{width:52px;height:52px;border-radius:50%;object-fit:cover;border:1px solid #6f5a1f}.brand h1{margin:0;color:var(--gold2);font-size:23px}.muted{color:var(--muted)}h2{margin:0;color:var(--gold2);font-size:20px}p{line-height:1.8}.field label{display:block;color:#d8d1c1;font-size:14px;margin:0 0 6px}.field input,.field select{width:100%;padding:14px;border-radius:13px;border:1px solid #353535;background:#090909;color:#fff;font-size:15px;outline:none}.field input:focus,.field select:focus{border-color:var(--gold)}.grid{display:grid;grid-template-columns:repeat(2,1fr);gap:13px}.full{grid-column:1/-1}.btn{border:1px solid var(--gold);background:var(--gold);color:#17120a;font-weight:900;border-radius:12px;padding:12px 18px;cursor:pointer;font-size:15px}.btn.ghost{background:transparent;color:var(--gold2)}.btn.danger{background:#351313;border-color:#8e3030;color:#fff}.btn.small{padding:9px 12px;font-size:13px}.msg{min-height:24px;color:var(--gold2);padding-top:8px}.admin-head{padding:18px;display:flex;justify-content:space-between;align-items:center;gap:14px;position:sticky;top:0;z-index:5;background:rgba(10,10,10,.94);backdrop-filter:blur(12px);border-bottom:1px solid var(--line)}.head-actions{display:flex;gap:8px;flex-wrap:wrap}.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin:14px 0}.stat{padding:16px;border:1px solid #2c281d;background:#0d0d0d;border-radius:16px}.stat b{display:block;font-size:25px;color:var(--gold2);margin-top:5px}.section{margin-top:14px;padding:20px}.section-head{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:16px}.form-card{background:#0c0c0c;border:1px solid #292929;border-radius:16px;padding:16px}.form-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px}.filebox{border:1px dashed #514723;border-radius:13px;padding:12px;background:#0b0b0b}.filebox input{border:0;padding:7px 0}.tools{display:grid;grid-template-columns:1fr 180px;gap:10px;margin-bottom:14px}.content-list{display:grid;gap:10px}.item{padding:15px;border:1px solid #292929;background:#0d0d0d;border-radius:16px}.item-main{display:flex;justify-content:space-between;gap:15px;align-items:flex-start}.title{font-size:17px;font-weight:900;margin-bottom:7px}.meta{color:#aaa;font-size:13px;line-height:1.8}.price{color:var(--gold2);font-weight:900;white-space:nowrap}.item-actions{display:flex;gap:7px;flex-wrap:wrap;margin-top:12px}.empty{text-align:center;padding:30px;color:#aaa}.badge{display:inline-block;border:1px solid #50431f;color:var(--gold2);border-radius:99px;padding:3px 9px;margin-left:5px;font-size:12px}.note{padding:11px 13px;border-radius:12px;background:#17130a;border:1px solid #3d331b;color:#cfc6b1;margin-bottom:14px}@media(max-width:700px){.grid,.stats,.tools{grid-template-columns:1fr}.full{grid-column:auto}.admin-head{align-items:flex-start}.item-main{flex-direction:column}.price{white-space:normal}.wrap{padding:8px 9px 30px}.section{padding:14px}.login{margin:4vh auto}}
+</style>
+</head>
+<body>
+<main class="wrap">
+<section id="login" class="panel login">
+  <div class="brand"><img class="logo" src="logo.png" alt="مكتبة الهاشمي"><div><h1>مكتبة الهاشمي</h1><div class="muted">دخول لوحة الإدارة</div></div></div>
+  <div style="height:20px"></div>
+  <div class="field"><label>البريد الإلكتروني</label><input id="email" type="email" autocomplete="username" placeholder="أدخل البريد الإلكتروني"></div>
+  <div class="field"><label>كلمة المرور</label><input id="password" type="password" autocomplete="current-password" placeholder="أدخل كلمة المرور"></div>
+  <button class="btn" id="loginBtn" style="width:100%;margin-top:7px">دخول إلى لوحة الإدارة</button>
+  <div id="loginMsg" class="msg"></div>
+</section>
+
+<section id="admin" class="hidden">
+  <header class="panel admin-head">
+    <div class="brand"><img class="logo" src="logo.png" alt=""><div><h1 style="margin:0;color:var(--gold2);font-size:22px">لوحة الإدارة</h1><div class="muted">تحكم كامل بمحتوى مكتبة الهاشمي</div></div></div>
+    <div class="head-actions"><a class="btn ghost small" href="index.html" target="_blank">عرض الموقع</a><button class="btn danger small" id="logoutBtn">خروج</button></div>
+  </header>
+
+  <div class="stats">
+    <div class="stat"><span class="muted">إجمالي المحتوى</span><b id="countAll">0</b></div>
+    <div class="stat"><span class="muted">المحتوى المدفوع</span><b id="countPaid">0</b></div>
+    <div class="stat"><span class="muted">المجاني</span><b id="countFree">0</b></div>
+  </div>
+
+  <section class="panel section" id="editor">
+    <div class="section-head"><div><h2 id="formTitle">➕ إضافة محتوى جديد</h2><div class="muted">املأ البيانات ثم اضغط حفظ</div></div><span id="editBadge" class="badge hidden">وضع التعديل</span></div>
+    <div class="note">📌 إذا كان المحتوى مجانيًا اترك السعر <b>0</b>. ملف الـPDF اختياري أثناء التعديل.</div>
+    <form id="form">
+      <div class="grid">
+        <div class="field full"><label>عنوان المحتوى *</label><input id="title" required placeholder="مثال: أسئلة رياضيات السادس العلمي 2026"></div>
+        <div class="field"><label>نوع المحتوى</label><select id="type"><option>أسئلة</option><option>ملازم</option><option>كتب</option><option>مراجعات</option><option>ملخصات</option><option>مراجع</option></select></div>
+        <div class="field"><label>المرحلة الدراسية</label><select id="stage"><option>الابتدائي</option><option>المتوسط</option><option>الإعدادية</option></select></div>
+        <div class="field" id="branchField" style="display:none"><label>الفرع</label><select id="branch"><option value="">اختر الفرع</option><option>العلمي</option><option>الأدبي</option></select></div>
+        <div class="field"><label>المادة</label><select id="subject"><option value="">اختر المادة</option></select></div>
+        <div class="field"><label>السعر بالدينار العراقي</label><input id="price" type="number" min="0" step="250" value="0" placeholder="0 = مجاني"></div>
+        <div class="field full filebox"><label>ملف PDF</label><input id="file" type="file" accept=".pdf,application/pdf"><div class="muted" style="font-size:12px">اختر ملف PDF فقط. عند التعديل يمكنك تركه فارغًا للإبقاء على الملف الحالي.</div></div>
+      </div>
+      <div class="form-actions"><button class="btn" id="saveBtn" type="submit">💾 حفظ المحتوى</button><button class="btn ghost hidden" type="button" id="cancelBtn">إلغاء التعديل</button></div>
+      <div id="formMsg" class="msg"></div>
+    </form>
+  </section>
+
+  <section class="panel section">
+    <div class="section-head"><div><h2>📚 المحتوى الحالي</h2><div class="muted">ابحث وعدّل أو احذف أي ملف بسهولة</div></div><button class="btn ghost small" id="refreshBtn">↻ تحديث</button></div>
+    <div class="tools"><input id="search" class="field" style="padding:13px;border-radius:13px;border:1px solid #353535;background:#090909;color:#fff" placeholder="ابحث باسم المحتوى أو المادة..."><select id="filter"><option value="all">كل الأنواع</option><option>أسئلة</option><option>ملازم</option><option>كتب</option><option>مراجعات</option><option>ملخصات</option><option>مراجع</option></select></div>
+    <div id="list" class="content-list"></div>
+  </section>
+</section>
+</main>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+window.SUPABASE_URL='https://bfiobmxgkxrmkukorqdq.supabase.co';
+window.SUPABASE_KEY='sb_publishable_3zAtbhl55a-jSMvuIGd6cw_LFv1nyCJ';
+const db=window.supabase.createClient(window.SUPABASE_URL,window.SUPABASE_KEY);
+const subjects={
+  'الابتدائي':['الإسلامية','العربي','الإنكليزي','الرياضيات','العلوم','الاجتماعيات'],
+  'المتوسط':['الإسلامية','العربي','الإنكليزي','الرياضيات','العلوم','الاجتماعيات'],
+  'الإعدادية':{
+    'العلمي':['الإسلامية','العربي','الإنكليزي','الرياضيات','الفيزياء','الكيمياء','الأحياء'],
+    'الأدبي':['الإسلامية','العربي','الإنكليزي','الرياضيات','التاريخ','الجغرافية','الاقتصاد']
+  }
+};
+let editing=null,oldPath=null,allItems=[];const $=id=>document.getElementById(id);
+function updateAcademicFields(){const stage=$('stage').value, branch=$('branch'), subject=$('subject'), bf=$('branchField'); const isPrep=stage==='الإعدادية'; bf.style.display=isPrep?'block':'none'; if(!isPrep) branch.value=''; const list=isPrep?(subjects[stage][branch.value]||[]):subjects[stage]||[]; const old=subject.value; subject.innerHTML='<option value="">اختر المادة</option>'+list.map(x=>`<option>${x}</option>`).join(''); if(list.includes(old)) subject.value=old;}
+$('stage').addEventListener('change',updateAcademicFields); $('branch').addEventListener('change',updateAcademicFields); updateAcademicFields();
+function esc(v){return String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}function safe(n){return n.replace(/[^\w.\-() ]+/g,'_')}function formatPrice(v){const n=Number(v||0);return n<=0?'مجاني':new Intl.NumberFormat('ar-IQ').format(n)+' د.ع'}
+async function boot(){const {data:{session}}=await db.auth.getSession();setSession(session);db.auth.onAuthStateChange((_e,s)=>setSession(s))}function setSession(s){$('login').classList.toggle('hidden',!!s);$('admin').classList.toggle('hidden',!s);if(s)load()}
+$('loginBtn').onclick=login;$('password').addEventListener('keydown',e=>{if(e.key==='Enter')login()});async function login(){const {error}=await db.auth.signInWithPassword({email:$('email').value.trim(),password:$('password').value});$('loginMsg').textContent=error?'تعذر الدخول: '+error.message:'تم الدخول بنجاح';}
+$('logoutBtn').onclick=()=>db.auth.signOut();$('refreshBtn').onclick=load;$('search').oninput=render;$('filter').onchange=render;$('cancelBtn').onclick=reset;
+async function load(){ $('list').innerHTML='<div class="empty">جاري تحميل المحتوى...</div>';const {data,error}=await db.from('content').select('*').order('created_at',{ascending:false});if(error){$('list').innerHTML='<div class="empty">حدث خطأ: '+esc(error.message)+'</div>';return}allItems=data||[];updateStats();render()}
+function updateStats(){const paid=allItems.filter(x=>Number(x.price||0)>0).length;$('countAll').textContent=allItems.length;$('countPaid').textContent=paid;$('countFree').textContent=allItems.length-paid}
+function render(){const q=$('search').value.trim().toLowerCase(),f=$('filter').value;const data=allItems.filter(x=>(f==='all'||x.type===f)&&(!q||[x.title,x.subject,x.stage,x.branch,x.type].some(v=>String(v||'').toLowerCase().includes(q))));if(!data.length){$('list').innerHTML='<div class="empty">لا يوجد محتوى مطابق.</div>';return}$('list').innerHTML=data.map(x=>`<article class="item"><div class="item-main"><div><div class="title">${esc(x.title)}</div><div class="meta"><span class="badge">${esc(x.type)}</span><span class="badge">${esc(x.stage)}</span>${x.branch?'<span class="badge">'+esc(x.branch)+'</span>':''}${x.subject?'<span class="badge">'+esc(x.subject)+'</span>':''}<br>${x.file_path?'📄 يوجد ملف PDF':'⚠️ بدون ملف'}</div></div><div class="price">${formatPrice(x.price)}</div></div><div class="item-actions"><button class="btn small" onclick='editItem(${JSON.stringify(x).replace(/</g,"\\u003c")})'>✏️ تعديل</button><button class="btn danger small" onclick='deleteItem(${x.id},${JSON.stringify(x.file_path||'')})'>🗑 حذف</button></div></article>`).join('')}
+$('form').addEventListener('submit',async e=>{e.preventDefault();$('saveBtn').disabled=true;$('formMsg').textContent='جاري الحفظ...';try{let path=oldPath;const f=$('file').files[0];if(f){if(f.type!=='application/pdf'&&!f.name.toLowerCase().endsWith('.pdf'))throw new Error('الملف يجب أن يكون PDF');if(path)await db.storage.from('library-files').remove([path]);path=`${crypto.randomUUID()}-${safe(f.name)}`;const up=await db.storage.from('library-files').upload(path,f,{contentType:'application/pdf',upsert:false});if(up.error)throw up.error}const payload={title:$('title').value.trim(),type:$('type').value,stage:$('stage').value,branch:$('stage').value==='الإعدادية'?$('branch').value:'',subject:$('subject').value.trim(),price:Math.max(0,Number($('price').value||0)),file_path:path};const r=editing?await db.from('content').update(payload).eq('id',editing):await db.from('content').insert(payload);if(r.error)throw r.error;reset();$('formMsg').textContent='تم الحفظ بنجاح ✅';await load()}catch(err){$('formMsg').textContent='لم يتم الحفظ: '+(err.message||err)}finally{$('saveBtn').disabled=false}});
+function editItem(x){editing=x.id;oldPath=x.file_path||null;$('title').value=x.title||'';$('type').value=x.type||'أسئلة';$('stage').value=x.stage||'الابتدائي'; updateAcademicFields(); $('branch').value=x.branch||''; updateAcademicFields(); $('subject').value=x.subject||'';$('price').value=x.price??0;$('formTitle').textContent='✏️ تعديل المحتوى';$('editBadge').classList.remove('hidden');$('cancelBtn').classList.remove('hidden');$('saveBtn').textContent='💾 حفظ التعديل';$('editor').scrollIntoView({behavior:'smooth'})}
+function reset(){editing=null;oldPath=null;$('form').reset();$('price').value=0;$('formTitle').textContent='➕ إضافة محتوى جديد';$('editBadge').classList.add('hidden');$('cancelBtn').classList.add('hidden');$('saveBtn').textContent='💾 حفظ المحتوى'}
+async function deleteItem(id,path){if(!confirm('هل تريد حذف هذا المحتوى نهائيًا؟'))return;const r=await db.from('content').delete().eq('id',id);if(r.error){alert(r.error.message);return}if(path)await db.storage.from('library-files').remove([path]);await load()}
+boot();
+</script></body></html>
