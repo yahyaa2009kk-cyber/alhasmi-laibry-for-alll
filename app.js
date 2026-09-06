@@ -145,15 +145,14 @@ async function submitOrder(e){
 
     $('purchaseForm').style.display='none';
     result.style.display='block';
-    result.innerHTML=`
+        result.innerHTML=`
       <div>✅ تم إنشاء الطلب بنجاح</div>
       <div>🧾 رقم الطلب: <strong>${esc(orderNumber)}</strong></div>
       <div>💰 المبلغ: <strong>${Number(order.amount||selectedItem.price||0).toLocaleString('ar-IQ')} د.ع</strong></div>
       <div>🔐 كود المطالبة:</div>
       <div class="order-code">${esc(claimCode)}</div>
-      <div style="color:#aaa38f;font-size:12px">احتفظ بالكود. بعد تأكيد الدفع، استخدمه مع بوت مكتبة الهاشمي لاستلام الملف.</div>
+      <div style="color:#aaa38f;font-size:12px">بعد تأكيد الدفع، استخدم هذا البوت: <b>@AlhashmiLibrary_bot</b> لاستلام الملف.</div>
     `;
-    <div style="color:#aaa38f;font-size:12px">بعد تأكيد الدفع، استخدم هذا البوت: <b>@AlhashmiLibrary_bot</b> لاستلام الملف.</div>
     toast('تم إنشاء الطلب وإرسال إشعار التليجرام.');
   }catch(err){
     console.error(err);
