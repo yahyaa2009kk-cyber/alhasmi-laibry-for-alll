@@ -124,16 +124,5 @@ footer{border-top:1px solid var(--line);padding:30px 0;color:#9d9685}
 <div id="toast" class="toast"></div>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><script>window.SUPABASE_URL = 'https://bfiobmxgkxrmkukorqdq.supabase.co';
 window.SUPABASE_KEY = 'sb_publishable_3zAtbhl55a-jSMvuIGd6cw_LFv1nyCJ';</script><script>
-const db=window.supabase.createClient(window.SUPABASE_URL,window.SUPABASE_KEY);
-let items=[]; let activeFilter='الكل';
-const $=id=>document.getElementById(id);
-async function load(){const {data,error}=await db.from('content').select('*').order('created_at',{ascending:false});if(error){$('status').textContent='تعذر تحميل المحتوى. تأكد من إعداد Supabase وسياسات RLS.';return}items=data||[];render()}
-function render(){const q=($('search').value||'').trim().toLowerCase();const rows=items.filter(x=>((activeFilter==='الكل')||(activeFilter==='مدفوع'&&Number(x.price||0)>0)||(x.type===activeFilter))&&(`${x.title} ${x.type} ${x.stage} ${x.branch||''} ${x.subject||''}`).toLowerCase().includes(q));$('status').textContent=`${rows.length} محتوى`; $('cards').innerHTML=rows.map(x=>{const url=x.file_path?db.storage.from('library-files').getPublicUrl(x.file_path).data.publicUrl:null;return `<article class="card"><div class="icon">${icon(x.type)}</div><span class="tag">${esc(x.type)} • ${esc(x.stage)}${x.branch?' • '+esc(x.branch):''}</span><h3>${esc(x.title)}</h3><p>${esc(x.subject||'')}</p><div class="price">${formatPrice(x.price)}</div>${url?`<a href="${url}" target="_blank" rel="noopener">فتح الملف</a>`:''}</article>`}).join('')||'<div class="empty">لا يوجد محتوى مطابق حاليًا.</div>'}
-function formatPrice(v){const n=Number(v||0);return n<=0?'مجاني':new Intl.NumberFormat('ar-IQ').format(n)+' د.ع'}
-function icon(t){return t==='أسئلة'?'📝':t==='ملازم'?'📚':t==='كتب'?'📖':'🔎'}
-function esc(v){return String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
-if('serviceWorker' in navigator){window.addEventListener('load',()=>navigator.serviceWorker.register('./sw.js').catch(()=>{}));}
-$('search').addEventListener('input',render);$('searchBtn').addEventListener('click',render);document.querySelectorAll('#filters button').forEach(b=>b.addEventListener('click',()=>{document.querySelectorAll('#filters button').forEach(x=>x.classList.remove('active'));b.classList.add('active');activeFilter=b.dataset.filter;render()}));$('whatsBtn').addEventListener('click',()=>{const n=$('contactName').value.trim(),m=$('contactMsg').value.trim();const text=encodeURIComponent(`السلام عليكم، أنا ${n||'طالب'}\n${m}`);location.href=`https://wa.me/96477404078255?text=${text}`});load();
-
-</script>
+<script src="app.js?v=2"></script>
 </body></html>
