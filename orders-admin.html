@@ -1,0 +1,736 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>طلبات الشراء | مكتبة الهاشمي</title>
+
+<style>
+:root{
+--bg:#070707;
+--gold:#d4aa27;
+--gold2:#f0d77a;
+--text:#f7f3e9;
+--muted:#aaa397;
+}
+
+*{box-sizing:border-box}
+
+body{
+margin:0;
+background:radial-gradient(circle at top,#17130a,#070707 45%);
+color:var(--text);
+font-family:Tahoma,Arial,sans-serif
+}
+
+.wrap{
+max-width:1100px;
+margin:auto;
+padding:14px
+}
+
+.panel{
+background:#101010;
+border:1px solid #332b18;
+border-radius:20px;
+padding:18px;
+box-shadow:0 15px 45px #0008
+}
+
+.hidden{display:none!important}
+
+.head{
+display:flex;
+justify-content:space-between;
+align-items:center;
+gap:10px;
+flex-wrap:wrap
+}
+
+.brand h1{
+margin:0;
+color:var(--gold2);
+font-size:23px
+}
+
+.muted{color:var(--muted)}
+
+button{
+border:1px solid var(--gold);
+background:var(--gold);
+color:#17120a;
+font-weight:900;
+border-radius:11px;
+padding:10px 15px;
+cursor:pointer
+}
+
+.ghost{
+background:transparent;
+color:var(--gold2)
+}
+
+.danger{
+background:#351313;
+border-color:#8e3030;
+color:#fff
+}
+
+.stats{
+display:grid;
+grid-template-columns:repeat(4,1fr);
+gap:10px;
+margin:14px 0
+}
+
+.stat{
+background:#0d0d0d;
+border:1px solid #292929;
+border-radius:15px;
+padding:14px
+}
+
+.stat b{
+display:block;
+color:var(--gold2);
+font-size:24px;
+margin-top:5px
+}
+
+.tools{
+display:flex;
+gap:10px;
+margin:14px 0
+}
+
+.tools input,
+.tools select{
+flex:1;
+background:#090909;
+color:#fff;
+border:1px solid #353535;
+border-radius:11px;
+padding:12px
+}
+
+.orders{
+display:grid;
+gap:11px
+}
+
+.order{
+background:#0d0d0d;
+border:1px solid #292929;
+border-radius:16px;
+padding:15px
+}
+
+.top{
+display:flex;
+justify-content:space-between;
+gap:10px
+}
+
+.title{
+font-weight:900;
+font-size:17px;
+color:#fff
+}
+
+.badge{
+display:inline-block;
+border-radius:99px;
+padding:4px 9px;
+font-size:12px;
+border:1px solid #4b4124;
+color:var(--gold2)
+}
+
+.info{
+color:#aaa;
+line-height:1.9;
+font-size:14px;
+margin-top:8px
+}
+
+.actions{
+display:flex;
+gap:7px;
+flex-wrap:wrap;
+margin-top:11px
+}
+
+.ok{
+border-color:#3d8e5c;
+background:#17351f;
+color:#bcebc9
+}
+
+.no{
+border-color:#8e3030;
+background:#351313;
+color:#ffd0d0
+}
+
+.empty{
+text-align:center;
+padding:35px;
+color:#aaa
+}
+
+.login{
+max-width:430px;
+margin:8vh auto
+}
+
+.field{
+margin:10px 0
+}
+
+.field label{
+display:block;
+color:#d8d1c1;
+margin-bottom:6px
+}
+
+.field input{
+width:100%;
+padding:13px;
+border-radius:11px;
+border:1px solid #353535;
+background:#090909;
+color:#fff
+}
+
+@media(max-width:700px){
+.stats{
+grid-template-columns:repeat(2,1fr)
+}
+
+.tools{
+flex-direction:column
+}
+
+.top{
+flex-direction:column
+}
+}
+</style>
+</head>
+
+<body>
+
+<div class="wrap">
+
+<section id="login" class="panel login">
+
+<h1 style="color:var(--gold2)">📋 طلبات الشراء</h1>
+
+<p class="muted">
+تسجيل دخول لوحة الإدارة
+</p>
+
+<div class="field">
+<label>البريد الإلكتروني</label>
+<input id="email" type="email">
+</div>
+
+<div class="field">
+<label>كلمة المرور</label>
+<input id="password" type="password">
+</div>
+
+<button id="loginBtn" style="width:100%">
+دخول
+</button>
+
+<div id="msg" class="muted"></div>
+
+</section>
+
+
+<section id="app" class="hidden">
+
+<header class="panel head">
+
+<div>
+
+<div class="brand">
+<h1>📋 طلبات الشراء</h1>
+</div>
+
+<div class="muted">
+متابعة الدفع وتسليم المحتوى المدفوع
+</div>
+
+</div>
+
+<div>
+
+<button class="ghost"
+onclick="location.href='admin.html'">
+لوحة المحتوى
+</button>
+
+<button class="danger" id="logout">
+خروج
+</button>
+
+</div>
+
+</header>
+
+
+<div class="stats">
+
+<div class="stat">
+كل الطلبات
+<b id="all">0</b>
+</div>
+
+<div class="stat">
+قيد الانتظار
+<b id="pending">0</b>
+</div>
+
+<div class="stat">
+مدفوع
+<b id="paid">0</b>
+</div>
+
+<div class="stat">
+مسلّم
+<b id="done">0</b>
+</div>
+
+</div>
+
+
+<section class="panel">
+
+<div class="tools">
+
+<input
+id="search"
+placeholder="ابحث برقم الطلب أو الاسم أو الكتاب..."
+>
+
+<select id="filter">
+
+<option value="all">
+كل الحالات
+</option>
+
+<option value="pending">
+قيد الانتظار
+</option>
+
+<option value="paid">
+مدفوع
+</option>
+
+<option value="failed">
+فشل
+</option>
+
+<option value="cancelled">
+ملغى
+</option>
+
+</select>
+
+<button id="refresh">
+↻ تحديث
+</button>
+
+</div>
+
+<div id="orders" class="orders"></div>
+
+</section>
+
+</section>
+
+</div>
+
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+<script>
+
+const db = supabase.createClient(
+'https://bfiobmxgkxrmkukorqdq.supabase.co',
+'sb_publishable_3zAtbhl55a-jSMvuIGd6cw_LFv1nyCJ'
+);
+
+let rows = [];
+
+const $ = id => document.getElementById(id);
+
+const esc = v =>
+String(v ?? '').replace(
+/[&<>\"']/g,
+c => ({
+'&':'&amp;',
+'<':'&lt;',
+'>':'&gt;',
+'\"':'&quot;',
+"'":'&#39;'
+}[c])
+);
+
+const price = v =>
+Number(v || 0).toLocaleString('ar-IQ') + ' د.ع';
+
+const statusText = {
+pending:'⏳ قيد الانتظار',
+paid:'✅ مدفوع',
+failed:'❌ فشل',
+cancelled:'🚫 ملغى'
+};
+
+
+async function boot(){
+
+const {
+data:{session}
+} = await db.auth.getSession();
+
+setSession(session);
+
+db.auth.onAuthStateChange(
+(_e,s)=>setSession(s)
+);
+
+}
+
+
+function setSession(s){
+
+$('login').classList.toggle(
+'hidden',
+!!s
+);
+
+$('app').classList.toggle(
+'hidden',
+!s
+);
+
+if(s) load();
+
+}
+
+
+$('loginBtn').onclick = async()=>{
+
+const {error} =
+await db.auth.signInWithPassword({
+
+email:$('email').value.trim(),
+
+password:$('password').value
+
+});
+
+$('msg').textContent =
+error
+? 'تعذر الدخول: ' + error.message
+: 'تم الدخول';
+
+};
+
+
+$('password').addEventListener(
+'keydown',
+e=>{
+if(e.key==='Enter')
+$('loginBtn').click();
+}
+);
+
+
+$('logout').onclick =
+()=>db.auth.signOut();
+
+$('refresh').onclick = load;
+
+$('search').oninput = render;
+
+$('filter').onchange = render;
+
+
+async function load(){
+
+$('orders').innerHTML =
+'<div class="empty">جاري تحميل الطلبات...</div>';
+
+const {
+data,
+error
+} = await db
+.from('orders')
+.select('*,content(title)')
+.order('created_at',{ascending:false});
+
+if(error){
+
+$('orders').innerHTML =
+'<div class="empty">خطأ: '
++ esc(error.message)
++ '</div>';
+
+return;
+
+}
+
+rows = data || [];
+
+stats();
+
+render();
+
+}
+
+
+function stats(){
+
+$('all').textContent =
+rows.length;
+
+$('pending').textContent =
+rows.filter(
+x=>x.payment_status==='pending'
+).length;
+
+$('paid').textContent =
+rows.filter(
+x=>x.payment_status==='paid'
+).length;
+
+$('done').textContent =
+rows.filter(
+x=>x.fulfillment_status==='fulfilled'
+).length;
+
+}
+
+
+function render(){
+
+const q =
+$('search').value.trim().toLowerCase();
+
+const f =
+$('filter').value;
+
+const data =
+rows.filter(x=>
+(f==='all' ||
+x.payment_status===f)
+&&
+(!q ||
+[
+x.order_number,
+x.customer_name,
+x.customer_phone,
+x.customer_telegram,
+x.content?.title
+].some(v=>
+String(v??'')
+.toLowerCase()
+.includes(q)
+))
+);
+
+if(!data.length){
+
+$('orders').innerHTML =
+'<div class="empty">لا توجد طلبات</div>';
+
+return;
+
+}
+
+
+$('orders').innerHTML =
+data.map(x=>`
+
+<article class="order">
+
+<div class="top">
+
+<div>
+
+<div class="title">
+📚 ${esc(x.content?.title || 'محتوى')}
+</div>
+
+<div class="info">
+
+🧾 #${esc(x.order_number)}
+<br>
+
+👤 ${esc(x.customer_name || 'غير مذكور')}
+<br>
+
+📞 ${esc(x.customer_phone || 'غير مذكور')}
+<br>
+
+💬 ${esc(x.customer_telegram || 'غير مذكور')}
+<br>
+
+💰 ${price(x.amount)}
+<br>
+
+🔐 كود المطالبة:
+<b>${esc(x.claim_code || 'غير موجود')}</b>
+
+<br>
+
+📅 ${new Date(x.created_at).toLocaleString('ar-IQ')}
+
+</div>
+
+</div>
+
+<span class="badge">
+${esc(
+statusText[x.payment_status]
+|| x.payment_status
+)}
+</span>
+
+</div>
+
+
+<div class="info">
+
+📦 حالة التسليم:
+${esc(x.fulfillment_status || 'pending')}
+
+</div>
+
+
+<div class="actions">
+
+${
+x.payment_status==='pending'
+?
+
+`
+<button
+class="ok"
+onclick="setPaid('${x.id}')">
+
+✅ تأكيد الدفع
+
+</button>
+
+<button
+class="no"
+onclick="setFailed('${x.id}')">
+
+❌ رفض الطلب
+
+</button>
+`
+
+:
+
+''
+}
+
+
+${
+x.payment_status==='paid'
+&&
+x.fulfillment_status!=='fulfilled'
+
+?
+
+`
+<span class="badge">
+
+يمكن للزبون إرسال كود المطالبة للبوت لاستلام الملف
+
+</span>
+`
+
+:
+
+''
+}
+
+</div>
+
+</article>
+
+`).join('');
+
+}
+
+
+async function setPaid(id){
+
+if(!confirm(
+'تأكيد أن هذا الطلب مدفوع؟'
+))
+return;
+
+const {error} =
+await db
+.from('orders')
+.update({
+payment_status:'paid',
+paid_at:new Date().toISOString()
+})
+.eq('id',id);
+
+if(error){
+
+alert(error.message);
+
+return;
+
+}
+
+load();
+
+}
+
+
+async function setFailed(id){
+
+if(!confirm(
+'رفض هذا الطلب؟'
+))
+return;
+
+const {error} =
+await db
+.from('orders')
+.update({
+payment_status:'failed'
+})
+.eq('id',id);
+
+if(error){
+
+alert(error.message);
+
+return;
+
+}
+
+load();
+
+}
+
+
+boot();
+
+</script>
+
+</body>
+</html>
