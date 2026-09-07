@@ -1,6 +1,8 @@
 const db=window.supabase.createClient(window.SUPABASE_URL,window.SUPABASE_KEY);
 
 const CREATE_ORDER_URL='https://bfiobmxgkxrmkukorqdq.supabase.co/functions/v1/create-order';
+const SUBMIT_PAYMENT_URL='https://bfiobmxgkxrmkukorqdq.supabase.co/functions/v1/submit-payment';
+const ORDER_STATUS_URL='https://bfiobmxgkxrmkukorqdq.supabase.co/functions/v1/order-status';
 let items=[];
 let activeFilter='الكل';
 
