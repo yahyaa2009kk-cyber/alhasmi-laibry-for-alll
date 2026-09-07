@@ -36,7 +36,55 @@ function isPaid(item){
   return Number(item.price||0)>0;
 }
 
-function createPurchaseModal(){
+function customer_phone:$('buyerPhone').value.trim()
+    })
+  });
+
+  const data=await res.json().catch(()=>({}));
+
+  if(!res.ok || !data.ok){
+    throw new Error(data.error || 'تعذر جلب حالة الطلب');
+  }
+
+  const order=data.order;
+
+  let html=`
+    <div>🧾 الطلب: <b>${esc(order.order_number)}</b></div>
+    <div>📚 المحتوى: ${esc(order.title)}</div>
+    <div>💰 المبلغ: ${Number(order.amount).toLocaleString('ar-IQ')} ${esc(order.currency || 'IQD')}</div>
+    <div>📌 ${esc(order.message)}</div>
+  `;
+
+  if(order.receipt_number){
+    html+=`<div>🧾 رقم الإيصال: ${esc(order.receipt_number)}</div>`;
+  }
+
+  if(order.payment_status==='paid' && order.claim_code){
+    html+=`
+      <hr>
+      <div>🎉 تم تأكيد الدفع</div>
+      <div>🔐 كود التسليم:</div>
+      <div class="order-code">${esc(order.claim_code)}</div>
+      <div class="purchase-note">
+        أرسل هذا الكود إلى بوت مكتبة الهاشمي لاستلام الملف.
+      </div>
+    `;
+  }
+
+  $('orderResult').style.display='block';
+  $('orderResult').innerHTML=html;
+
+}catch(err){
+
+  toast(err.message || 'حدث خطأ');
+
+}finally{
+
+  btn.disabled=false;
+  btn.textContent='🔍 حالة الطلب';
+
+}
+}); }{
   if($('purchaseModal')) return;
 
   const style=document.createElement('style');
