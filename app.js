@@ -1,4 +1,4 @@
-const db=window.supabase.createClient(window.SUPABASE_URL,window.SUPABASE_KEY);
+let db=null;
 
 const CREATE_ORDER_URL='https://bfiobmxgkxrmkukorqdq.supabase.co/functions/v1/create-order';
 const SUBMIT_PAYMENT_URL='https://bfiobmxgkxrmkukorqdq.supabase.co/functions/v1/submit-payment';
@@ -433,27 +433,45 @@ function render(){
   });
 }
 
-createPurchaseModal();
+function initApp(){
+  const statusEl=$('status');
+  if(!window.supabase || !window.SUPABASE_URL || !window.SUPABASE_KEY){
+    if(statusEl) statusEl.textContent='تعذر تشغيل الموقع: إعدادات Supabase غير موجودة.';
+    return;
+  }
 
-$('search').addEventListener('input',render);
-$('searchBtn').addEventListener('click',render);
+  db=window.supabase.createClient(window.SUPABASE_URL,window.SUPABASE_KEY);
 
-document.querySelectorAll('#filters button').forEach(b=>{
-  b.addEventListener('click',()=>{
-    document.querySelectorAll('#filters button').forEach(x=>x.classList.remove('active'));
-    b.classList.add('active');
-    activeFilter=b.dataset.filter;
-    render();
+  createPurchaseModal();
+
+  const searchEl=$('search');
+  const searchBtnEl=$('searchBtn');
+  if(searchEl) searchEl.addEventListener('input',render);
+  if(searchBtnEl) searchBtnEl.addEventListener('click',render);
+
+  document.querySelectorAll('#filters button').forEach(b=>{
+    b.addEventListener('click',()=>{
+      document.querySelectorAll('#filters button').forEach(x=>x.classList.remove('active'));
+      b.classList.add('active');
+      activeFilter=b.dataset.filter || 'الكل';
+      render();
+    });
   });
-});
 
-if($('whatsBtn')){
-  $('whatsBtn').addEventListener('click',()=>{
-    const n=$('buyerName')?.value.trim() || 'طالب';
-    const m=$('buyerPhone')?.value.trim() || '';
-    const text=encodeURIComponent(`السلام عليكم، أنا ${n}${m ? `، رقم هاتفي ${m}` : ''}`);
-    location.href=`https://wa.me/96477404078255?text=${text}`;
-  });
+  if($('whatsBtn')){
+    $('whatsBtn').addEventListener('click',()=>{
+      const n=$('contactName')?.value.trim() || 'طالب';
+      const m=$('contactMsg')?.value.trim() || '';
+      const text=encodeURIComponent(`السلام عليكم، أنا ${n}\n${m}`);
+      location.href=`https://wa.me/96477404078255?text=${text}`;
+    });
+  }
+
+  load();
 }
 
-load();
+if(document.readyState==='loading'){
+  document.addEventListener('DOMContentLoaded',initApp);
+}else{
+  initApp();
+}
