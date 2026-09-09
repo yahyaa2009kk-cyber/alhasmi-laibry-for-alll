@@ -3,8 +3,10 @@ let db=null;
 const CREATE_ORDER_URL='https://bfiobmxgkxrmkukorqdq.supabase.co/functions/v1/create-order';
 const SUBMIT_PAYMENT_URL='https://bfiobmxgkxrmkukorqdq.supabase.co/functions/v1/submit-payment';
 const ORDER_STATUS_URL='https://bfiobmxgkxrmkukorqdq.supabase.co/functions/v1/order-status';
+
 let items=[];
 let activeFilter='الكل';
+let selectedItem=null;
 
 const $=id=>document.getElementById(id);
 
@@ -33,7 +35,7 @@ function icon(t){
 }
 
 function isPaid(item){
-  return Number(item.price||0)>0;
+  return Number(item?.price||0)>0;
 }
 
 function createPurchaseModal(){
@@ -41,7 +43,7 @@ function createPurchaseModal(){
 
   const style=document.createElement('style');
   style.textContent=`
-    #purchaseModal{position:fixed;inset:0;background:rgba(0,0,0,.78);z-index:999;display:none;align-items:center;justify-content:center;padding:18px}
+    #purchaseModal{position:fixed;inset:0;background:rgba(0,0,0,.78);z-index:9999;display:none;align-items:center;justify-content:center;padding:18px}
     #purchaseModal.show{display:flex}
     .purchase-box{width:min(520px,100%);max-height:90vh;overflow:auto;background:#101010;border:1px solid #5a4816;border-radius:18px;padding:24px;box-shadow:0 25px 80px rgba(0,0,0,.7)}
     .purchase-box h2{margin:0 0 6px;color:#f1d36a}
@@ -54,7 +56,7 @@ function createPurchaseModal(){
     .purchase-actions button{flex:1;min-width:120px;padding:12px;border-radius:11px;font-family:inherit;font-weight:900;cursor:pointer}
     .purchase-submit{background:#c9a227;border:1px solid #c9a227;color:#080706}
     .purchase-cancel{background:#0c0b08;border:1px solid #51431e;color:#f1d36a}
-    .payment-btn{background:#17130a;border:1px solid #66521c;color:#f1d36a}
+    .payment-btn{background:#17130a;border:1px solid #66521c;color:#f1d36a;padding:10px 12px;border-radius:9px;font-family:inherit;font-weight:900;cursor:pointer;margin-top:8px}
     .order-result{margin-top:15px;padding:14px;border-radius:12px;background:#19150a;border:1px solid #5a4816;line-height:2}
     .order-code{font-size:22px;font-weight:900;color:#f1d36a;letter-spacing:1px}
     .purchase-note{font-size:12px;color:#aaa38f;margin-top:10px}
@@ -63,95 +65,59 @@ function createPurchaseModal(){
 
   const modal=document.createElement('div');
   modal.id='purchaseModal';
-
   modal.innerHTML=`
     <div class="purchase-box" role="dialog" aria-modal="true">
       <h2>🛒 شراء المحتوى</h2>
       <div id="purchaseTitle" class="purchase-title"></div>
-
       <form id="purchaseForm">
         <label>الاسم</label>
         <input id="buyerName" required placeholder="اكتب اسمك">
-
         <label>رقم الهاتف</label>
         <input id="buyerPhone" required inputmode="tel" placeholder="07xxxxxxxxx">
-
         <label>حساب التليجرام (اختياري)</label>
         <input id="buyerTelegram" placeholder="@username">
-
         <div class="purchase-actions">
-          <button type="submit" class="purchase-submit" id="purchaseSubmit">
-            إنشاء الطلب
-          </button>
-
-          <button type="button" class="purchase-cancel" id="purchaseCancel">
-            إلغاء
-          </button>
+          <button type="submit" class="purchase-submit" id="purchaseSubmit">إنشاء الطلب</button>
+          <button type="button" class="purchase-cancel" id="purchaseCancel">إلغاء</button>
         </div>
       </form>
-
       <div id="paymentArea" style="display:none">
         <div class="payment-box">
           <div style="color:#ddd7c7;font-weight:900">💳 طريقة الدفع</div>
           <div id="paymentInstructions" class="purchase-note"></div>
-
           <div style="margin-top:10px;color:#aaa">اسم صاحب الحساب:</div>
           <div id="masterName" style="font-weight:900;color:#fff"></div>
-
           <div style="margin-top:10px;color:#aaa">رقم الماستر:</div>
           <div id="masterNumber" class="payment-number"></div>
-
-          <button type="button" class="payment-btn" id="copyMaster">
-            📋 نسخ رقم الماستر
-          </button>
-
-          <button type="button" class="payment-btn" id="whatsappPayment">
-            📱 التواصل عبر واتساب
-          </button>
+          <button type="button" class="payment-btn" id="copyMaster">📋 نسخ رقم الماستر</button>
+          <button type="button" class="payment-btn" id="whatsappPayment">📱 التواصل عبر واتساب</button>
         </div>
-
         <label>رقم الإيصال</label>
         <input id="receiptNumber" placeholder="اكتب رقم الإيصال بعد التحويل">
-
         <div class="purchase-actions">
-          <button type="button" class="purchase-submit" id="submitPaymentBtn">
-            ✅ تم التحويل
-          </button>
-
-          <button type="button" class="payment-btn" id="checkStatusBtn">
-            🔍 حالة الطلب
-          </button>
+          <button type="button" class="purchase-submit" id="submitPaymentBtn">✅ تم التحويل</button>
+          <button type="button" class="payment-btn" id="checkStatusBtn">🔍 حالة الطلب</button>
         </div>
       </div>
-
       <div id="orderResult" class="order-result" style="display:none"></div>
-
-      <div class="purchase-note">
-        بعد التحويل أرسل رقم الإيصال للتحقق من الدفع.
-        لا يتم تسليم الملف إلا بعد تأكيد الدفع.
-      </div>
+      <div class="purchase-note">بعد التحويل أرسل رقم الإيصال للتحقق من الدفع. لا يتم تسليم الملف إلا بعد تأكيد الدفع.</div>
     </div>
   `;
-
   document.body.appendChild(modal);
 
   let currentOrder=null;
 
   $('purchaseCancel').addEventListener('click',closePurchaseModal);
-
-  modal.addEventListener('click',e=>{
-    if(e.target===modal) closePurchaseModal();
-  });
+  modal.addEventListener('click',e=>{ if(e.target===modal) closePurchaseModal(); });
 
   async function loadPaymentSettings(){
-    const {data,error}=await db
-      .from('payment_settings')
+    if(!db) return;
+    const {data,error}=await db.from('payment_settings')
       .select('master_name,master_number,whatsapp_number,instructions')
-      .eq('id',1)
-      .single();
+      .eq('id',1).maybeSingle();
 
     if(error || !data){
-      $('paymentInstructions').textContent='تعذر تحميل بيانات الدفع.';
+      $('paymentInstructions').textContent='تعذر تحميل بيانات الدفع من الإعدادات.';
       return;
     }
 
@@ -170,27 +136,18 @@ function createPurchaseModal(){
 
     $('whatsappPayment').onclick=()=>{
       const number=String(data.whatsapp_number || '').replace(/[^0-9]/g,'');
-      if(!number){
-        toast('رقم واتساب غير مضبوط.');
-        return;
-      }
-
-      const text=encodeURIComponent(
-        `السلام عليكم، أريد دفع قيمة المحتوى: ${selectedItem?.title || ''}`
-      );
-
-      window.open(`https://wa.me/${number}?text=${text}`,'_blank');
+      if(!number){ toast('رقم واتساب غير مضبوط.'); return; }
+      const text=encodeURIComponent(`السلام عليكم، أريد دفع قيمة المحتوى: ${selectedItem?.title || ''}`);
+      window.open(`https://wa.me/${number}?text=${text}`,'_blank','noopener');
     };
   }
 
   $('purchaseForm').addEventListener('submit',async e=>{
     e.preventDefault();
-
     if(!selectedItem) return;
 
     const btn=$('purchaseSubmit');
     const result=$('orderResult');
-
     const payload={
       content_id:selectedItem.id,
       customer_name:$('buyerName').value.trim(),
@@ -213,18 +170,12 @@ function createPurchaseModal(){
         headers:{'Content-Type':'application/json'},
         body:JSON.stringify(payload)
       });
-
       const data=await res.json().catch(()=>({}));
-
-      if(!res.ok || !data.ok){
-        throw new Error(data.error || 'تعذر إنشاء الطلب');
-      }
+      if(!res.ok || !data.ok) throw new Error(data.error || 'تعذر إنشاء الطلب');
 
       currentOrder=data.order;
-
       $('purchaseForm').style.display='none';
       $('paymentArea').style.display='block';
-
       result.style.display='block';
       result.innerHTML=`
         <div>✅ تم إنشاء الطلب</div>
@@ -233,9 +184,7 @@ function createPurchaseModal(){
         <div>💰 المبلغ: ${Number(currentOrder.amount).toLocaleString('ar-IQ')} ${esc(currentOrder.currency || 'IQD')}</div>
         <div style="margin-top:8px">حوّل المبلغ ثم اكتب رقم الإيصال واضغط «تم التحويل».</div>
       `;
-
       await loadPaymentSettings();
-
     }catch(err){
       result.style.display='block';
       result.innerHTML=`❌ ${esc(err.message || 'حدث خطأ')}`;
@@ -246,17 +195,10 @@ function createPurchaseModal(){
   });
 
   $('submitPaymentBtn').addEventListener('click',async()=>{
-    if(!currentOrder){
-      toast('أنشئ الطلب أولاً.');
-      return;
-    }
+    if(!currentOrder){ toast('أنشئ الطلب أولاً.'); return; }
 
     const receipt=$('receiptNumber').value.trim();
-
-    if(!receipt){
-      toast('اكتب رقم الإيصال أولاً.');
-      return;
-    }
+    if(!receipt){ toast('اكتب رقم الإيصال أولاً.'); return; }
 
     const btn=$('submitPaymentBtn');
     btn.disabled=true;
@@ -272,12 +214,8 @@ function createPurchaseModal(){
           receipt_number:receipt
         })
       });
-
       const data=await res.json().catch(()=>({}));
-
-      if(!res.ok || !data.ok){
-        throw new Error(data.error || 'تعذر إرسال الإيصال');
-      }
+      if(!res.ok || !data.ok) throw new Error(data.error || 'تعذر إرسال الإيصال');
 
       $('orderResult').style.display='block';
       $('orderResult').innerHTML=`
@@ -285,9 +223,7 @@ function createPurchaseModal(){
         <div>🧾 الطلب: <b>${esc(currentOrder.order_number)}</b></div>
         <div>⏳ الحالة: بانتظار التحقق من الدفع</div>
       `;
-
       toast('تم إرسال الإيصال للتحقق ✅');
-
     }catch(err){
       toast(err.message || 'حدث خطأ');
     }finally{
@@ -297,10 +233,7 @@ function createPurchaseModal(){
   });
 
   $('checkStatusBtn').addEventListener('click',async()=>{
-    if(!currentOrder){
-      toast('أنشئ الطلب أولاً.');
-      return;
-    }
+    if(!currentOrder){ toast('أنشئ الطلب أولاً.'); return; }
 
     const btn=$('checkStatusBtn');
     btn.disabled=true;
@@ -315,41 +248,28 @@ function createPurchaseModal(){
           customer_phone:$('buyerPhone').value.trim()
         })
       });
-
       const data=await res.json().catch(()=>({}));
-
-      if(!res.ok || !data.ok){
-        throw new Error(data.error || 'تعذر جلب حالة الطلب');
-      }
+      if(!res.ok || !data.ok) throw new Error(data.error || 'تعذر جلب حالة الطلب');
 
       const order=data.order;
-
       let html=`
         <div>🧾 الطلب: <b>${esc(order.order_number)}</b></div>
         <div>📚 المحتوى: ${esc(order.title)}</div>
         <div>💰 المبلغ: ${Number(order.amount).toLocaleString('ar-IQ')} ${esc(order.currency || 'IQD')}</div>
         <div>📌 ${esc(order.message)}</div>
       `;
-
-      if(order.receipt_number){
-        html+=`<div>🧾 رقم الإيصال: ${esc(order.receipt_number)}</div>`;
-      }
-
+      if(order.receipt_number) html+=`<div>🧾 رقم الإيصال: ${esc(order.receipt_number)}</div>`;
       if(order.payment_status==='paid' && order.claim_code){
         html+=`
           <hr>
           <div>🎉 تم تأكيد الدفع</div>
           <div>🔐 كود التسليم:</div>
           <div class="order-code">${esc(order.claim_code)}</div>
-          <div class="purchase-note">
-            أرسل هذا الكود إلى بوت مكتبة الهاشمي لاستلام الملف.
-          </div>
+          <div class="purchase-note">أرسل هذا الكود إلى بوت مكتبة الهاشمي لاستلام الملف.</div>
         `;
       }
-
       $('orderResult').style.display='block';
       $('orderResult').innerHTML=html;
-
     }catch(err){
       toast(err.message || 'حدث خطأ');
     }finally{
@@ -358,8 +278,6 @@ function createPurchaseModal(){
     }
   });
 }
-
-let selectedItem=null;
 
 function openPurchaseModal(item){
   createPurchaseModal();
@@ -371,7 +289,7 @@ function openPurchaseModal(item){
   $('orderResult').innerHTML='';
   $('receiptNumber').value='';
   $('purchaseModal').classList.add('show');
-  $('buyerName').focus();
+  setTimeout(()=>$('buyerName')?.focus(),50);
 }
 
 function closePurchaseModal(){
@@ -381,17 +299,50 @@ function closePurchaseModal(){
 }
 
 async function load(){
-  const {data,error}=await db.from('content').select('*').order('created_at',{ascending:false});
-  if(error){
-    $('status').textContent='تعذر تحميل المحتوى. تأكد من إعداد Supabase وسياسات RLS.';
+  const status=$('status');
+  const cards=$('cards');
+
+  if(!db){
+    if(status) status.textContent='تعذر الاتصال بقاعدة البيانات.';
     return;
   }
-  items=data||[];
-  render();
+
+  if(status) status.textContent='جاري تحميل المحتوى...';
+
+  try{
+    const controller=new AbortController();
+    const timer=setTimeout(()=>controller.abort(),12000);
+
+    const {data,error}=await db
+      .from('content')
+      .select('id,title,type,stage,subject,price,file_path,branch,created_at')
+      .order('created_at',{ascending:false});
+
+    clearTimeout(timer);
+
+    if(error) throw error;
+
+    items=Array.isArray(data)?data:[];
+    render();
+  }catch(error){
+    console.error('CONTENT LOAD ERROR:',error);
+    if(status){
+      status.textContent=error?.name==='AbortError'
+        ? 'تأخر تحميل المحتوى. حدّث الصفحة وحاول مرة أخرى.'
+        : `تعذر تحميل المحتوى: ${error?.message || 'خطأ غير معروف'}`;
+    }
+    if(cards) cards.innerHTML='<div class="empty">تعذر تحميل المحتوى حاليًا.</div>';
+  }
 }
 
 function render(){
-  const q=($('search').value||'').trim().toLowerCase();
+  const search=$('search');
+  const status=$('status');
+  const cards=$('cards');
+
+  if(!cards) return;
+
+  const q=(search?.value||'').trim().toLowerCase();
 
   const rows=items.filter(x=>{
     const filterOk=
@@ -399,31 +350,29 @@ function render(){
       (activeFilter==='المدفوع' && isPaid(x)) ||
       x.type===activeFilter;
 
-    return filterOk &&
-      (`${x.title} ${x.type} ${x.stage} ${x.branch||''} ${x.subject||''}`)
-      .toLowerCase()
-      .includes(q);
+    const text=`${x.title||''} ${x.type||''} ${x.stage||''} ${x.branch||''} ${x.subject||''}`.toLowerCase();
+    return filterOk && text.includes(q);
   });
 
-  $('status').textContent=`${rows.length} محتوى`;
+  if(status) status.textContent=`${rows.length} محتوى`;
 
-  $('cards').innerHTML=rows.map(x=>{
+  cards.innerHTML=rows.map(x=>{
     const paid=isPaid(x);
     const url=x.file_path
-      ?db.storage.from('library-files').getPublicUrl(x.file_path).data.publicUrl
-      :null;
+      ? db.storage.from('library-files').getPublicUrl(x.file_path).data.publicUrl
+      : null;
 
     return `<article class="card user-item-card">
       <div class="icon">${icon(x.type)}</div>
-      <span class="tag">${esc(x.type)} • ${esc(x.stage)}${x.branch?' • '+esc(x.branch):''}</span>
-      <h3>${esc(x.title)}</h3>
+      <span class="tag">${esc(x.type||'')} • ${esc(x.stage||'')}${x.branch?' • '+esc(x.branch):''}</span>
+      <h3>${esc(x.title||'بدون عنوان')}</h3>
       <p>${esc(x.subject||'')}</p>
       ${paid
-        ? `<span class="price">💰 ${Number(x.price).toLocaleString('ar-IQ')} د.ع</span>
-           <button class="buy-content-btn" data-id="${x.id}" style="display:block;margin-top:14px;width:100%;padding:10px 12px;border:1px solid #c9a227;border-radius:9px;background:#c9a227;color:#080706;font-family:inherit;font-weight:900;cursor:pointer">🛒 شراء الآن</button>`
-        : (url?`<a href="${url}" target="_blank" rel="noopener">فتح الملف</a>`:'')}
+        ? `<span class="price">💰 ${Number(x.price||0).toLocaleString('ar-IQ')} د.ع</span>
+           <button class="buy-content-btn" data-id="${esc(x.id)}" style="display:block;margin-top:14px;width:100%;padding:10px 12px;border:1px solid #c9a227;border-radius:9px;background:#c9a227;color:#080706;font-family:inherit;font-weight:900;cursor:pointer">🛒 شراء الآن</button>`
+        : (url?`<a href="${esc(url)}" target="_blank" rel="noopener">فتح الملف</a>`:'')}
     </article>`;
-  }).join('')||'<div class="empty">لا يوجد محتوى مطابق حاليًا.</div>';
+  }).join('') || '<div class="empty">لا يوجد محتوى مطابق حاليًا.</div>';
 
   document.querySelectorAll('.buy-content-btn').forEach(btn=>{
     btn.addEventListener('click',()=>{
@@ -435,43 +384,59 @@ function render(){
 
 function initApp(){
   const statusEl=$('status');
-  if(!window.supabase || !window.SUPABASE_URL || !window.SUPABASE_KEY){
-    if(statusEl) statusEl.textContent='تعذر تشغيل الموقع: إعدادات Supabase غير موجودة.';
-    return;
-  }
 
-  db=window.supabase.createClient(window.SUPABASE_URL,window.SUPABASE_KEY);
+  try{
+    if(!window.supabase){
+      if(statusEl) statusEl.textContent='تعذر تشغيل الموقع: مكتبة Supabase غير محملة.';
+      return;
+    }
 
-  createPurchaseModal();
+    if(!window.SUPABASE_URL || !window.SUPABASE_KEY){
+      if(statusEl) statusEl.textContent='تعذر تشغيل الموقع: إعدادات Supabase غير موجودة.';
+      return;
+    }
 
-  const searchEl=$('search');
-  const searchBtnEl=$('searchBtn');
-  if(searchEl) searchEl.addEventListener('input',render);
-  if(searchBtnEl) searchBtnEl.addEventListener('click',render);
+    db=window.supabase.createClient(
+      window.SUPABASE_URL,
+      window.SUPABASE_KEY
+    );
 
-  document.querySelectorAll('#filters button').forEach(b=>{
-    b.addEventListener('click',()=>{
-      document.querySelectorAll('#filters button').forEach(x=>x.classList.remove('active'));
-      b.classList.add('active');
-      activeFilter=b.dataset.filter || 'الكل';
-      render();
+    createPurchaseModal();
+
+    const searchEl=$('search');
+    const searchBtnEl=$('searchBtn');
+
+    if(searchEl) searchEl.addEventListener('input',render);
+    if(searchBtnEl) searchBtnEl.addEventListener('click',render);
+
+    document.querySelectorAll('#filters button').forEach(b=>{
+      b.addEventListener('click',()=>{
+        document.querySelectorAll('#filters button').forEach(x=>x.classList.remove('active'));
+        b.classList.add('active');
+        activeFilter=b.dataset.filter || 'الكل';
+        render();
+      });
     });
-  });
 
-  if($('whatsBtn')){
-    $('whatsBtn').addEventListener('click',()=>{
-      const n=$('contactName')?.value.trim() || 'طالب';
-      const m=$('contactMsg')?.value.trim() || '';
-      const text=encodeURIComponent(`السلام عليكم، أنا ${n}\n${m}`);
-      location.href=`https://wa.me/96477404078255?text=${text}`;
-    });
+    const whatsBtn=$('whatsBtn');
+    if(whatsBtn){
+      whatsBtn.addEventListener('click',()=>{
+        const n=$('contactName')?.value.trim() || 'طالب';
+        const m=$('contactMsg')?.value.trim() || '';
+        const text=encodeURIComponent(`السلام عليكم، أنا ${n}\n${m}`);
+        window.location.href=`https://wa.me/96477404078255?text=${text}`;
+      });
+    }
+
+    load();
+  }catch(error){
+    console.error('APP INIT ERROR:',error);
+    if(statusEl) statusEl.textContent=`حدث خطأ في تشغيل الموقع: ${error?.message || 'خطأ غير معروف'}`;
   }
-
-  load();
 }
 
 if(document.readyState==='loading'){
-  document.addEventListener('DOMContentLoaded',initApp);
+  document.addEventListener('DOMContentLoaded',initApp,{once:true});
 }else{
   initApp();
 }
