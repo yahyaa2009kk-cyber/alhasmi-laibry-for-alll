@@ -397,6 +397,324 @@ function init(){
       location.href=`https://wa.me/96477404078255?text=${text}`;
     });
   }
+   const ORDER_TRACKING_KEY='alhasmi_last_order_v1';
+
+async function checkOrderStatus(orderNumber, phone, resultEl){
+  if(!orderNumber || !phone){
+    resultEl.style.display='block';
+    resultEl.innerHTML='⚠️ اكتب رقم الطلب ورقم الهاتف.';
+    return;
+  }
+
+  resultEl.style.display='block';
+  resultEl.innerHTML='⏳ جاري التحقق من حالة الطلب...';
+
+  try{
+    const res=await fetch(ORDER_STATUS_URL,{
+      method:'POST',
+      headers:{
+        'Content-Type':'application/json'
+      },
+      body:JSON.stringify({
+        order_number:orderNumber.trim(),
+        customer_phone:phone.trim()
+      })
+    });
+
+    const data=await res.json().catch(()=>({}));
+
+    if(!res.ok || !data.ok){
+      throw new Error(
+        data.error || 'تعذر جلب حالة الطلب'
+      );
+    }
+
+    const order=data.order || {};
+
+    let status='⏳ قيد الانتظار';
+
+    if(order.payment_status==='paid'){
+      status='✅ تم تأكيد الدفع';
+    }else if(order.payment_status==='failed'){
+      status='❌ فشل الدفع';
+    }else if(order.payment_status==='cancelled'){
+      status='🚫 الطلب ملغى';
+    }
+
+    let html=`
+      <div>🧾 رقم الطلب:
+        <b>${esc(order.order_number || orderNumber)}</b>
+      </div>
+
+      <div>📚 المحتوى:
+        ${esc(order.title || '')}
+      </div>
+
+      <div>💰 المبلغ:
+        ${Number(order.amount || 0).toLocaleString('ar-IQ')}
+        ${esc(order.currency || 'IQD')}
+      </div>
+
+      <div style="margin-top:8px">
+        📌 الحالة:
+        <b>${status}</b>
+      </div>
+    `;
+
+    if(order.receipt_number){
+      html+=`
+        <div>
+          🧾 رقم الإيصال:
+          ${esc(order.receipt_number)}
+        </div>
+      `;
+    }
+
+    if(order.message){
+      html+=`
+        <div>
+          💬 ${esc(order.message)}
+        </div>
+      `;
+    }
+
+    if(
+      order.payment_status==='paid' &&
+      order.claim_code
+    ){
+      html+=`
+        <hr>
+
+        <div>🎉 تم تأكيد الدفع بنجاح</div>
+
+        <div>🔐 كود التسليم:</div>
+
+        <div class="order-code">
+          ${esc(order.claim_code)}
+        </div>
+
+        <button
+          type="button"
+          class="payment-btn"
+          id="deliveryBotBtn"
+        >
+          🤖 استلام الملف عبر التليجرام
+        </button>
+      `;
+    }else{
+      html+=`
+        <div class="purchase-note">
+          ⏳ الطلب بانتظار تأكيد الدفع.
+          يمكنك تحديث الحالة لاحقاً.
+        </div>
+      `;
+    }
+
+    resultEl.innerHTML=html;
+
+    localStorage.setItem(
+      ORDER_TRACKING_KEY,
+      JSON.stringify({
+        order_number:order.order_number || orderNumber,
+        customer_phone:phone,
+        title:order.title || ''
+      })
+    );
+
+    if(
+      order.payment_status==='paid' &&
+      order.claim_code
+    ){
+      const bot=$('deliveryBotBtn');
+
+      if(bot){
+        bot.onclick=()=>{
+          window.open(
+            `https://t.me/${TELEGRAM_BOT_USERNAME}?start=${encodeURIComponent(order.claim_code)}`,
+            '_blank',
+            'noopener'
+          );
+        };
+      }
+    }
+
+  }catch(err){
+
+    resultEl.style.display='block';
+
+    resultEl.innerHTML=`
+      ❌ ${esc(err.message || 'حدث خطأ')}
+    `;
+  }
+}
+
+
+function createOrderTracking(){
+
+  if($('orderTracking')) return;
+
+  const style=document.createElement('style');
+
+  style.textContent=`
+    #orderTracking{
+      width:min(1160px,92%);
+      margin:35px auto;
+      padding:24px;
+      background:linear-gradient(145deg,#101010,#090909);
+      border:1px solid #5a4816;
+      border-radius:18px;
+    }
+
+    #orderTracking h2{
+      margin:0 0 5px;
+      color:#f1d36a;
+    }
+
+    #orderTracking p{
+      color:#aaa38f;
+      font-size:13px;
+      margin:0 0 16px;
+    }
+
+    .tracking-grid{
+      display:grid;
+      grid-template-columns:1fr 1fr auto;
+      gap:10px;
+    }
+
+    .tracking-grid input{
+      width:100%;
+      box-sizing:border-box;
+      padding:12px;
+      border-radius:11px;
+      border:1px solid #302d25;
+      background:#090909;
+      color:#fff;
+      font-family:inherit;
+    }
+
+    .tracking-grid button{
+      padding:12px 18px;
+      border-radius:11px;
+      border:1px solid #c9a227;
+      background:#c9a227;
+      color:#080706;
+      font-family:inherit;
+      font-weight:900;
+      cursor:pointer;
+    }
+
+    .tracking-result{
+      display:none;
+      margin-top:15px;
+      padding:15px;
+      border-radius:12px;
+      background:#19150a;
+      border:1px solid #5a4816;
+      line-height:2;
+    }
+
+    @media(max-width:650px){
+      .tracking-grid{
+        grid-template-columns:1fr;
+      }
+
+      .tracking-grid button{
+        width:100%;
+      }
+    }
+  `;
+
+  document.head.appendChild(style);
+
+  const box=document.createElement('section');
+
+  box.id='orderTracking';
+
+  box.innerHTML=`
+    <h2>🔍 متابعة الطلب</h2>
+
+    <p>
+      اكتب رقم الطلب ورقم الهاتف لمعرفة حالة الطلب والدفع.
+    </p>
+
+    <div class="tracking-grid">
+
+      <input
+        id="trackingOrderNumber"
+        placeholder="رقم الطلب"
+        autocomplete="off"
+      >
+
+      <input
+        id="trackingPhone"
+        placeholder="رقم الهاتف 07xxxxxxxxx"
+        inputmode="tel"
+        autocomplete="tel"
+      >
+
+      <button
+        type="button"
+        id="trackingCheck"
+      >
+        🔍 تحديث الحالة
+      </button>
+
+    </div>
+
+    <div
+      id="trackingResult"
+      class="tracking-result"
+    ></div>
+  `;
+
+  const content=$('content');
+
+  if(content){
+    content.parentNode.insertBefore(
+      box,
+      content
+    );
+  }else{
+    document.body.appendChild(box);
+  }
+
+  const saved=(()=>{
+    try{
+      return JSON.parse(
+        localStorage.getItem(ORDER_TRACKING_KEY)||'null'
+      );
+    }catch{
+      return null;
+    }
+  })();
+
+  if(saved){
+
+    $('trackingOrderNumber').value=
+      saved.order_number || '';
+
+    $('trackingPhone').value=
+      saved.customer_phone || '';
+  }
+
+  $('trackingCheck').onclick=async()=>{
+
+    const btn=$('trackingCheck');
+
+    btn.disabled=true;
+    btn.textContent='⏳ جاري التحقق...';
+
+    await checkOrderStatus(
+      $('trackingOrderNumber').value,
+      $('trackingPhone').value,
+      $('trackingResult')
+    );
+
+    btn.disabled=false;
+    btn.textContent='🔍 تحديث الحالة';
+  };
+}
   load();
 }
 
