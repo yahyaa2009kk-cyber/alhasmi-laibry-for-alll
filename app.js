@@ -8,7 +8,7 @@ const PAYMENT_QR_URL='qr-maktabat-alhashmi.jpg';
 
 let items=[];
 let activeFilter='الكل';
-let selectedItem=null;
+
 
 const $=id=>document.getElementById(id);
 
